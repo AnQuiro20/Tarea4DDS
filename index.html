@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Prototipo - Principios de Diseño</title>
+    <style>
+        /* ---------------------------
+       ESTILO GENERAL
+    --------------------------- */
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        section {
+            padding: 25px;
+            margin: 25px auto;
+            background: white;
+            border-radius: 16px;
+            max-width: 900px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-left: 6px solid #4ca1af;
+            padding-left: 10px;
+        }
+
+        h3 {
+            margin-top: 20px;
+            color: #34495e;
+        }
+
+        /* ---------------------------
+       TARJETAS Y BOTONES
+    --------------------------- */
+        .card {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #4ca1af;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ---------------------------
+       ÁREAS DE LOG Y REGLAS
+    --------------------------- */
+        .event-log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            height: 180px;
+            overflow-y: auto;
+            font-family: "Courier New", Courier, monospace;
+            border: 1px solid #ddd;
+            white-space: pre-line;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            border-radius: 12px;
+            padding: 12px;
+            font-family: "Courier New", Courier, monospace;
+            border: 1px solid #ccc;
+            resize: none;
+            transition: border 0.3s;
+        }
+
+        textarea:focus {
+            border: 1px solid #4ca1af;
+            outline: none;
+            box-shadow: 0 0 6px rgba(76, 161, 175, 0.5);
+        }
+
+        /* ---------------------------
+       FOOTER
+    --------------------------- */
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Prototipo - Principios de Diseño</h1>
+        <p>Reducción del acoplamiento & Diseño para la flexibilidad</p>
+    </header>
+
+    <!-- Reducción del Acoplamiento -->
+    <section>
+        <h2>🔹 Reducción del acoplamiento</h2>
+        <p>
+            <b>Ejemplo:</b> Arquitectura basada en eventos en un hospital digital.<br>
+            Los módulos reaccionan a <i>eventos</i> en lugar de depender directamente unos de otros.
+        </p>
+
+        <div class="card">
+            <button onclick="emitirEvento('RecetaCreada')">💊 Crear receta</button>
+            <button onclick="emitirEvento('CitaAgendada')">📅 Agendar cita</button>
+            <button onclick="emitirEvento('PagoConfirmado')">💵 Confirmar pago</button>
+        </div>
+
+        <h3>📜 Registro de eventos:</h3>
+        <div class="event-log" id="eventLog"></div>
+    </section>
+
+    <!-- Diseño para la Flexibilidad -->
+    <section>
+        <h2>🔹 Diseño para la flexibilidad</h2>
+        <p>
+            <b>Ejemplo:</b> Motor de reglas dinámico en un e-commerce.<br>
+            El sistema se adapta a cambios cargando reglas desde un archivo JSON.
+        </p>
+
+        <textarea id="rulesInput">{
+  "descuento": "30% en electrónicos el Black Friday",
+  "impuesto": "13% IVA en Costa Rica, 7% en Panamá",
+  "envio": "Gratis para clientes VIP"
+}</textarea><br>
+        <button onclick="aplicarReglas()">⚙️ Aplicar reglas</button>
+
+        <h3>⚙️ Reglas activas:</h3>
+        <div class="event-log" id="rulesOutput"></div>
+    </section>
+
+    <footer>
+        © 2025 - Prototipo académico para Principios de Diseño
+    </footer>
+
+    <script>
+        // ----------------------------
+        // Reducción del Acoplamiento
+        // ----------------------------
+        const subsistemas = {
+            farmacia: (evento) => {
+                if (evento === "RecetaCreada") return "💊 Farmacia: Preparando medicamentos.";
+            },
+            facturacion: (evento) => {
+                if (evento === "PagoConfirmado") return "💵 Facturación: Generando recibo.";
+            },
+            notificaciones: (evento) => {
+                if (evento === "CitaAgendada") return "📲 Notificación: Recordatorio enviado al paciente.";
+            }
+        };
+
+        function emitirEvento(evento) {
+            const log = document.getElementById("eventLog");
+            log.innerHTML += `\n➡️ Evento emitido: ${evento}`;
+            for (const [nombre, modulo] of Object.entries(subsistemas)) {
+                const respuesta = modulo(evento);
+                if (respuesta) log.innerHTML += `\n   ${respuesta}`;
+            }
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // ----------------------------
+        // Diseño para la Flexibilidad
+        // ----------------------------
+        function aplicarReglas() {
+            const input = document.getElementById("rulesInput").value;
+            const output = document.getElementById("rulesOutput");
+            try {
+                const reglas = JSON.parse(input);
+                output.innerHTML = "";
+                for (const [k, v] of Object.entries(reglas)) {
+                    output.innerHTML += ` ${k.toUpperCase()}: ${v}\n`;
+                }
+            } catch (e) {
+                output.innerHTML = " Error en el formato JSON";
+            }
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
